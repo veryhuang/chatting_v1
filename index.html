@@ -1,0 +1,261 @@
+<!--
+index.html - 主HTML文件
+这是微信聊天记录生成器的主要HTML结构文件
+
+功能和作用：
+1. 定义整个应用的HTML结构，包括编辑区和预览区
+2. 提供用户界面元素，如表单控件、按钮和模态框
+3. 链接所有CSS样式和JavaScript脚本文件
+4. 建立响应式布局，适配不同屏幕尺寸
+5. 模拟微信聊天界面的外观和交互体验
+
+组件包括：
+- 顶部导航栏：用于保存/加载模板和导出图片
+- 左侧编辑区：用于设置用户信息、背景和编辑聊天内容
+- 右侧预览区：实时展示生成的微信聊天界面效果
+- 各种模态框：用于保存/加载模板和导出设置
+
+最后更新：2024-03-19
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟微信聊天记录生成器</title>
+    <!-- 引入样式表 -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- 网站图标 -->
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <!-- 网站描述 -->
+    <meta name="description" content="在线生成虚拟微信聊天记录，自定义聊天内容、头像和昵称，导出为图片">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">虚拟微信聊天记录生成器</h1>
+            <nav class="nav">
+                <ul class="nav__menu">
+                    <li class="nav__item"><button id="saveBtn" class="btn">保存模板</button></li>
+                    <li class="nav__item"><button id="loadBtn" class="btn">加载模板</button></li>
+                    <li class="nav__item"><button id="exportBtn" class="btn btn--primary">导出图片</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="main">
+        <div class="container">
+            <!-- 左侧编辑区域 -->
+            <section class="editor">
+                <h2 class="editor__title">编辑区</h2>
+                
+                <!-- 用户信息设置 -->
+                <div class="panel">
+                    <h3 class="panel__title">用户信息设置</h3>
+                    <div class="panel__content">
+                        <!-- 对方的昵称 -->
+                        <div class="form-group">
+                            <label for="friendName" class="form-label">对方昵称：</label>
+                            <input type="text" id="friendName" class="form-input" value="好友">
+                        </div>
+                        
+                        <!-- 头像设置 -->
+                        <div class="avatar-settings">
+                            <div class="avatar-group">
+                                <label class="form-label">我的头像：</label>
+                                <div class="avatar-preview" id="myAvatar"></div>
+                                <input type="file" id="myAvatarUpload" class="avatar-upload" accept="image/*">
+                                <label for="myAvatarUpload" class="btn btn--small">上传头像</label>
+                            </div>
+                            
+                            <div class="avatar-group">
+                                <label class="form-label">对方头像：</label>
+                                <div class="avatar-preview" id="friendAvatar"></div>
+                                <input type="file" id="friendAvatarUpload" class="avatar-upload" accept="image/*">
+                                <label for="friendAvatarUpload" class="btn btn--small">上传头像</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 聊天样式设置 -->
+                <div class="panel">
+                    <h3 class="panel__title">聊天样式设置</h3>
+                    <div class="panel__content">
+                        <!-- 背景设置 -->
+                        <div class="form-group">
+                            <label class="form-label">聊天背景：</label>
+                            <select id="backgroundSelect" class="form-select">
+                                <option value="default">默认背景</option>
+                                <option value="white">纯白</option>
+                                <option value="gray">浅灰</option>
+                                <option value="black">纯黑</option>
+                                <option value="custom">自定义图片</option>
+                            </select>
+                            <div id="customBackgroundContainer" class="custom-background hidden">
+                                <input type="file" id="customBackground" accept="image/*">
+                                <label for="customBackground" class="btn btn--small">选择图片</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 聊天内容编辑 -->
+                <div class="panel">
+                    <h3 class="panel__title">聊天内容编辑</h3>
+                    <div class="panel__content">
+                        <!-- 添加新消息 -->
+                        <div class="form-group">
+                            <label for="messageContent" class="form-label">消息内容：</label>
+                            <textarea id="messageContent" class="form-textarea" rows="3" placeholder="输入消息内容..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">消息发送方：</label>
+                            <div class="radio-group">
+                                <input type="radio" id="senderMe" name="sender" value="me" checked>
+                                <label for="senderMe" class="radio-label">我</label>
+                                
+                                <input type="radio" id="senderFriend" name="sender" value="friend">
+                                <label for="senderFriend" class="radio-label">对方</label>
+                                
+                                <input type="radio" id="senderSystem" name="sender" value="system">
+                                <label for="senderSystem" class="radio-label">系统提示</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="messageTime" class="form-label">消息时间：</label>
+                            <input type="time" id="messageTime" class="form-input">
+                        </div>
+                        
+                        <button id="addMessageBtn" class="btn btn--primary btn--block">添加消息</button>
+                        
+                        <!-- 消息列表 -->
+                        <div class="message-list">
+                            <h4 class="message-list__title">已添加的消息：</h4>
+                            <ul id="editorMessageList" class="message-items">
+                                <!-- 动态生成的消息项 -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 右侧预览区域 -->
+            <section class="preview">
+                <h2 class="preview__title">预览区</h2>
+                
+                <div class="preview-container">
+                    <!-- 手机状态栏 -->
+                    <div class="wx-phone-status">
+                        <div class="wx-phone-time">09:05</div>
+                        <div class="wx-phone-icons">
+                            <span class="wx-phone-signal"></span>
+                            <span class="wx-phone-wifi"></span>
+                            <span class="wx-phone-battery">100</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 微信顶部导航栏 -->
+                    <div class="wx-status-bar">
+                        <div class="wx-status-bar__back">
+                            <span class="wx-icon wx-icon--back"></span>
+                            <span class="wx-back-count"></span>
+                        </div>
+                        <div class="wx-status-bar__title" id="previewFriendName">好友</div>
+                        <div class="wx-status-bar__actions">
+                            <span class="wx-icon wx-icon--more"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- 聊天记录区域 -->
+                    <div id="chatContainer" class="wx-chat-container">
+                        <div id="chatContent" class="wx-chat-content">
+                            <!-- 动态生成的聊天消息 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 底部输入框 -->
+                    <div class="wx-input-bar">
+                        <div class="wx-input-bar__voice"></div>
+                        <div class="wx-input-bar__text">按住 说话</div>
+                        <div class="wx-input-bar__emoji"></div>
+                        <div class="wx-input-bar__plus"></div>
+                    </div>
+                    
+                    <!-- 底部导航条 -->
+                    <div class="wx-bottom-indicator"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 模板选择弹窗 -->
+    <div id="templateModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">选择模板</h3>
+            <div class="template-list" id="templateList">
+                <!-- 动态生成的模板项 -->
+            </div>
+            <div class="modal__actions">
+                <button id="closeTemplateModal" class="btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出选项弹窗 -->
+    <div id="exportModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">导出选项</h3>
+            <div class="form-group">
+                <label class="form-label">图片格式：</label>
+                <select id="exportFormat" class="form-select">
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPG</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">导出范围：</label>
+                <select id="exportRange" class="form-select">
+                    <option value="all">全部聊天记录</option>
+                    <option value="selected">选中部分</option>
+                </select>
+            </div>
+            <div class="modal__actions">
+                <button id="startExportBtn" class="btn btn--primary">开始导出</button>
+                <button id="closeExportModal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存模板弹窗 -->
+    <div id="saveTemplateModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">保存模板</h3>
+            <div class="form-group">
+                <label for="templateName" class="form-label">模板名称：</label>
+                <input type="text" id="templateName" class="form-input" placeholder="输入模板名称...">
+            </div>
+            <div class="modal__actions">
+                <button id="confirmSaveTemplate" class="btn btn--primary">保存</button>
+                <button id="closeSaveTemplateModal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入html2canvas库 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <!-- 引入JavaScript文件 -->
+    <script src="js/app.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/export.js"></script>
+</body>
+</html> 
