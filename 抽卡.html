@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽卡系统</title>
+    <style>
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+
+        #drawButton {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #4741b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #drawButton:hover {
+            background-color: #ac3e7b;
+        }
+
+        .card-container {
+            margin-top: 30px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 300px;
+            height: 400px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .draw-animation {
+            animation: drawCard 1s ease-out;
+        }
+
+        @keyframes drawCard {
+            0% {
+                transform: translateY(-200%) scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-100%) scale(0.9);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* 添加牌堆容器样式 */
+        .deck-container {
+            position: relative;
+            height: 150px;
+            margin: 20px auto;
+        }
+
+        /* 牌堆中的卡片样式 */
+        .deck-card {
+            width: 80px;
+            height: 120px;
+            background-image: url('https://f1-seo.v3mh.com/social/ca0b302dfdbd03be0eec308cc632adc1-compress-gue-watermark.seo');
+            background-size: cover;
+            background-position: center;
+            border: none;
+            cursor: pointer;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        /* 洗牌动画 */
+        @keyframes shuffle {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-70%, -50%) rotate(-15deg); }
+            75% { transform: translate(-30%, -50%) rotate(15deg); }
+        }
+
+        /* 抽牌动画 */
+        @keyframes draw {
+            0% { 
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -200%) scale(0.8);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="drawButton">抽卡</button>
+        <!-- 添加牌堆容器 -->
+        <div class="deck-container" id="deckContainer">
+            <!-- 牌堆将通过JavaScript动态生成 -->
+        </div>
+        <div id="cardContainer" class="card-container">
+            <div id="card" class="card hidden">
+                <div class="card-inner">
+                    <img id="cardImage" src="" alt="卡片图片">
+                    <h3 id="cardName"></h3>
+                    <p id="cardDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 卡片数据
+        const cards = [
+            {
+                id: 1,
+                name: "火焰战士",
+                image: "https://example.com/fire-warrior.jpg",
+                description: "来自火焰之国的勇士，擅长火焰魔法。"
+            },
+            {
+                id: 2,
+                name: "冰霜法师",
+                image: "https://example.com/ice-mage.jpg",
+                description: "掌控冰霜之力的神秘法师。"
+            }
+            // 可以继续添加更多卡片
+        ];
+
+        document.getElementById('drawButton').addEventListener('click', drawCard);
+
+        // 创建牌堆
+        function createDeck() {
+            const deckContainer = document.getElementById('deckContainer');
+            deckContainer.innerHTML = '';
+            // 创建5张叠在一起的卡片作为牌堆效果
+            for (let i = 0; i < 5; i++) {
+                const card = document.createElement('div');
+                card.className = 'deck-card';
+                card.style.transform = `translate(-50%, -${50 + i * 2}%)`;
+                deckContainer.appendChild(card);
+            }
+        }
+
+        // 页面加载时创建牌堆
+        createDeck();
+
+        // 修改抽卡函数
+        function drawCard() {
+            const button = document.getElementById('drawButton');
+            button.disabled = true;
+
+            // 获取牌堆中的卡片
+            const deckCards = document.querySelectorAll('.deck-card');
+            
+            // 播放洗牌动画
+            deckCards.forEach(card => {
+                card.style.animation = 'shuffle 0.5s ease-in-out';
+            });
+
+            // 洗牌动画结束后播放抽牌动画
+            setTimeout(() => {
+                deckCards.forEach(card => {
+                    card.style.animation = 'draw 0.5s ease-in-out forwards';
+                });
+
+                // 抽牌动画结束后显示卡片内容
+                setTimeout(() => {
+                    // 随机选择卡片
+                    const randomCard = cards[Math.floor(Math.random() * cards.length)];
+                    
+                    // 获取卡片元素
+                    const cardElement = document.getElementById('card');
+                    const cardImage = document.getElementById('cardImage');
+                    const cardName = document.getElementById('cardName');
+                    const cardDescription = document.getElementById('cardDescription');
+
+                    // 设置卡片内容
+                    cardImage.src = randomCard.image;
+                    cardName.textContent = randomCard.name;
+                    cardDescription.textContent = randomCard.description;
+
+                    // 显示卡片并播放动画
+                    cardElement.classList.remove('hidden');
+                    cardElement.classList.add('draw-animation');
+
+                    // 重新创建牌堆
+                    setTimeout(() => {
+                        createDeck();
+                        button.disabled = false;
+                    }, 1000);
+                }, 500);
+            }, 500);
+        }
+    </script>
+</body>
+</html> 
