@@ -27,12 +27,174 @@ index.html - 主HTML文件
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <!-- 新增身份验证样式 -->
+    <link rel="stylesheet" href="css/auth.css">
     <!-- 网站图标 -->
     <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
     <!-- 网站描述 -->
     <meta name="description" content="在线生成虚拟微信聊天记录，自定义聊天内容、头像和昵称，导出为图片">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics-compat.js"></script>
 </head>
 <body>
+    <!-- 身份验证容器 -->
+    <div id="authContainer" class="auth-container hidden">
+        <!-- 登录表单容器 -->
+        <div id="loginContainer" class="auth-form-container">
+            <h2 class="auth-title">登录到聊天记录生成器</h2>
+            
+            <!-- 消息提示 -->
+            <div id="authMessage" class="auth-message hidden"></div>
+            
+            <!-- 登录表单 -->
+            <form id="loginForm" class="auth-form">
+                <!-- 邮箱 -->
+                <div class="auth-form-group">
+                    <label for="loginEmail" class="auth-label">邮箱</label>
+                    <input type="email" id="loginEmail" class="auth-input" placeholder="请输入您的邮箱" required>
+                </div>
+                
+                <!-- 密码 -->
+                <div class="auth-form-group">
+                    <label for="loginPassword" class="auth-label">密码</label>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="请输入您的密码" required>
+                </div>
+                
+                <!-- 登录按钮 -->
+                <button type="submit" class="auth-button">登录</button>
+                
+                <!-- 辅助链接 -->
+                <div class="auth-links">
+                    <a id="forgotPasswordLink" class="auth-link">忘记密码？</a>
+                    <a id="showRegisterBtn" class="auth-link">没有账号？注册</a>
+                </div>
+            </form>
+            
+            <!-- 分隔线 -->
+            <div class="auth-divider">
+                <span class="auth-divider-text">或使用</span>
+            </div>
+            
+            <!-- 第三方登录 -->
+            <div class="auth-alt-methods">
+                <button id="googleLoginBtn" class="auth-alt-button google-login-button">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    使用Google账号登录
+                </button>
+                
+                <!-- 电话登录按钮 -->
+                <button id="showPhoneLoginBtn" class="auth-alt-button phone-login-button">
+                    <svg class="auth-icon" viewBox="0 0 24 24">
+                        <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
+                    </svg>
+                    使用手机号码登录
+                </button>
+                
+                <!-- 匿名登录按钮 -->
+                <button id="anonymousLoginBtn" class="auth-alt-button anonymous-login-button">
+                    <svg class="auth-icon" viewBox="0 0 24 24">
+                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                    </svg>
+                    匿名访问
+                </button>
+            </div>
+        </div>
+        
+        <!-- 注册表单容器 -->
+        <div id="registerContainer" class="auth-form-container hidden">
+            <h2 class="auth-title">注册新账号</h2>
+            
+            <!-- 注册表单 -->
+            <form id="registerForm" class="auth-form">
+                <!-- 邮箱 -->
+                <div class="auth-form-group">
+                    <label for="registerEmail" class="auth-label">邮箱</label>
+                    <input type="email" id="registerEmail" class="auth-input" placeholder="请输入您的邮箱" required>
+                </div>
+                
+                <!-- 密码 -->
+                <div class="auth-form-group">
+                    <label for="registerPassword" class="auth-label">密码</label>
+                    <input type="password" id="registerPassword" class="auth-input" placeholder="请设置密码（至少6位）" required minlength="6">
+                </div>
+                
+                <!-- 确认密码 -->
+                <div class="auth-form-group">
+                    <label for="confirmPassword" class="auth-label">确认密码</label>
+                    <input type="password" id="confirmPassword" class="auth-input" placeholder="请再次输入密码" required minlength="6">
+                </div>
+                
+                <!-- 注册按钮 -->
+                <button type="submit" class="auth-button">注册</button>
+                
+                <!-- 已有账号 -->
+                <div class="auth-links">
+                    <a id="showLoginBtn" class="auth-link">已有账号？去登录</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 电话登录表单容器 -->
+        <div id="phoneLoginContainer" class="auth-form-container hidden">
+            <h2 class="auth-title">手机号码登录</h2>
+            
+            <!-- 第一步：输入手机号码 -->
+            <div id="phoneStep1" class="phone-step">
+                <div class="auth-form-group">
+                    <label for="phoneNumber" class="auth-label">手机号码</label>
+                    <div class="phone-input-container">
+                        <select id="phoneCountryCode" class="country-code-select">
+                            <option value="+86">+86</option>
+                            <option value="+1">+1</option>
+                            <option value="+44">+44</option>
+                            <option value="+81">+81</option>
+                            <option value="+82">+82</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" class="auth-input" placeholder="请输入手机号码" required>
+                    </div>
+                </div>
+                
+                <!-- reCAPTCHA容器 -->
+                <div id="recaptchaContainer" class="recaptcha-container"></div>
+                
+                <button id="sendCodeBtn" class="auth-button">发送验证码</button>
+            </div>
+            
+            <!-- 第二步：输入验证码 -->
+            <div id="phoneStep2" class="phone-step hidden">
+                <div class="auth-form-group">
+                    <label for="verificationCode" class="auth-label">验证码</label>
+                    <input type="text" id="verificationCode" class="auth-input auth-code-input" placeholder="请输入6位验证码" maxlength="6" required>
+                </div>
+                
+                <div class="auth-timer">
+                    <span id="codeTimer">60</span>秒后可重新发送
+                </div>
+                
+                <button id="verifyCodeBtn" class="auth-button">验证并登录</button>
+            </div>
+            
+            <!-- 返回登录选项 -->
+            <div class="auth-links">
+                <a id="backToLoginBtn" class="auth-link">返回其他登录方式</a>
+            </div>
+        </div>
+        
+        <!-- 用户信息显示 -->
+        <div id="userDisplay" class="user-display hidden">
+            <div class="user-avatar">
+                <img id="userAvatar" src="assets/images/default-avatar-me.png" alt="用户头像">
+            </div>
+            <div class="user-info">
+                <div id="userEmail" class="user-email">用户邮箱</div>
+                <div id="logoutBtn" class="user-logout">退出登录</div>
+            </div>
+        </div>
+    </div>
+
     <!-- 顶部导航栏 -->
     <header class="header">
         <div class="container">
@@ -48,7 +210,7 @@ index.html - 主HTML文件
     </header>
 
     <!-- 主要内容区域 -->
-    <main class="main">
+    <main id="mainContent" class="main">
         <div class="container">
             <!-- 左侧编辑区域 -->
             <section class="editor">
@@ -252,7 +414,9 @@ index.html - 主HTML文件
     <!-- 引入html2canvas库 -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
-    <!-- 引入JavaScript文件 -->
+    <!-- 引入脚本 -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/preview.js"></script>

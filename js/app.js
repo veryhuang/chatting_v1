@@ -7,6 +7,7 @@
  * 3. 加载默认资源和数据
  * 4. 检查浏览器兼容性并提供警告
  * 5. 协调各个模块之间的通信
+ * 6. 与Firebase身份验证模块集成
  * 
  * 主要职责：
  * - 应用程序启动和初始化
@@ -14,13 +15,16 @@
  * - 默认图像资源加载
  * - 数据持久化管理
  * - 兼容性警告显示
+ * - 集成身份验证功能
  * 
  * 依赖模块：
  * - editor.js：编辑功能模块
  * - preview.js：预览功能模块
  * - export.js：导出功能模块
+ * - auth.js：身份验证模块
+ * - firebase-config.js：Firebase配置
  * 
- * 最后更新：2024-03-19
+ * 最后更新：2024-06-04
  */
 
 // 应用程序模块
@@ -34,6 +38,9 @@ const AppModule = {
         
         // 加载默认图片资源
         this.loadDefaultResources();
+        
+        // 检查身份验证状态
+        this.checkAuthState();
         
         // 在窗口关闭前保存数据
         window.addEventListener('beforeunload', () => {
@@ -120,6 +127,127 @@ const AppModule = {
             }
         };
         img.src = imagePath;
+    },
+    
+    /**
+     * 检查用户身份验证状态
+     */
+    checkAuthState: function() {
+        // 检查Firebase模块和身份验证模块是否已加载
+        if (typeof FirebaseModule !== 'undefined' && typeof AuthModule !== 'undefined') {
+            console.log('Firebase和身份验证模块已加载');
+            
+            // 启用身份验证功能
+            this.enableAuthentication();
+        } else {
+            console.error('Firebase或身份验证模块未加载，无法启用身份验证功能');
+            
+            // 显示警告
+            this.showCompatibilityWarning('无法加载身份验证功能，部分功能可能无法正常使用。');
+            
+            // 显示主内容
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) {
+                mainContent.classList.remove('hidden');
+            }
+        }
+    },
+    
+    /**
+     * 启用身份验证功能
+     */
+    enableAuthentication: function() {
+        // 监听Firebase身份验证状态变化
+        FirebaseModule.auth.onAuthStateChanged((user) => {
+            if (user) {
+                // 用户已登录
+                console.log('用户已登录:', user.email);
+                
+                // 隐藏登录表单
+                const authContainer = document.getElementById('authContainer');
+                if (authContainer) {
+                    authContainer.classList.add('hidden');
+                }
+                
+                // 显示主内容
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.classList.remove('hidden');
+                }
+                
+                // 更新导航栏，显示用户信息
+                this.updateNavbarWithUserInfo(user);
+            } else {
+                // 用户未登录
+                console.log('用户未登录，显示登录表单');
+                
+                // 显示登录表单
+                const authContainer = document.getElementById('authContainer');
+                if (authContainer) {
+                    authContainer.classList.remove('hidden');
+                }
+                
+                // 隐藏主内容
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.classList.add('hidden');
+                }
+            }
+        });
+    },
+    
+    /**
+     * 更新导航栏显示用户信息
+     * @param {Object} user - 登录的用户对象
+     */
+    updateNavbarWithUserInfo: function(user) {
+        // 获取导航栏
+        const navbar = document.querySelector('.nav__menu');
+        
+        // 检查是否已存在用户信息元素
+        let userInfoElement = document.getElementById('navUserInfo');
+        
+        // 获取用户显示名称
+        let userDisplayName = '';
+        if (user.isAnonymous) {
+            userDisplayName = '匿名用户';
+        } else if (user.email) {
+            userDisplayName = user.email;
+        } else if (user.phoneNumber) {
+            userDisplayName = user.phoneNumber;
+        } else {
+            userDisplayName = '已登录用户';
+        }
+        
+        // 如果不存在，则创建用户信息元素
+        if (!userInfoElement) {
+            const userInfoLi = document.createElement('li');
+            userInfoLi.className = 'nav__item nav__item--user';
+            
+            userInfoLi.innerHTML = `
+                <div id="navUserInfo" class="nav__user-info">
+                    <span id="navUserEmail">${userDisplayName}</span>
+                    <button id="navLogoutBtn" class="btn btn--small">登出</button>
+                </div>
+            `;
+            
+            // 添加到导航栏
+            navbar.appendChild(userInfoLi);
+            
+            // 绑定登出按钮点击事件
+            document.getElementById('navLogoutBtn').addEventListener('click', () => {
+                FirebaseModule.auth.signOut()
+                    .then(() => {
+                        console.log('用户已登出');
+                    })
+                    .catch(error => {
+                        console.error('登出错误:', error);
+                    });
+            });
+        } else {
+            // 更新用户邮箱显示
+            document.getElementById('navUserEmail').textContent = userDisplayName;
+        }
     }
 };
 

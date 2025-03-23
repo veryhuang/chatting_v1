@@ -806,4 +806,42 @@ a:hover {
 .wx-bg-custom {
     background-size: cover;
     background-position: center;
+}
+
+/* ----- 导航栏用户信息 ----- */
+.nav__item--user {
+    margin-left: auto;
+}
+
+.nav__user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: rgba(7, 193, 96, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(7, 193, 96, 0.2);
+}
+
+#navUserEmail {
+    font-size: 0.9rem;
+    color: var(--dark-color);
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#navLogoutBtn {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    transition: all 0.2s ease;
+}
+
+#navLogoutBtn:hover {
+    background-color: var(--primary-color);
+    color: white;
 } 
