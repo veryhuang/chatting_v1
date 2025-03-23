@@ -39,6 +39,9 @@ const AuthModule = {
      * 初始化身份验证功能
      */
     init: function() {
+        // 确保默认显示登录表单
+        this.ensureAuthFormsVisible();
+        
         // 绑定登录和注册表单事件
         this.bindEvents();
         
@@ -46,6 +49,46 @@ const AuthModule = {
         this.monitorAuthState();
         
         console.log('身份验证模块已初始化');
+    },
+    
+    /**
+     * 确保登录表单可见
+     */
+    ensureAuthFormsVisible: function() {
+        // 显示登录容器
+        const authContainer = document.getElementById('authContainer');
+        if (authContainer) {
+            authContainer.classList.remove('hidden');
+        }
+        
+        // 确保主登录表单可见
+        const loginContainer = document.getElementById('loginContainer');
+        if (loginContainer) {
+            loginContainer.classList.remove('hidden');
+        }
+        
+        // 隐藏其他表单
+        const registerContainer = document.getElementById('registerContainer');
+        if (registerContainer) {
+            registerContainer.classList.add('hidden');
+        }
+        
+        const phoneLoginContainer = document.getElementById('phoneLoginContainer');
+        if (phoneLoginContainer) {
+            phoneLoginContainer.classList.add('hidden');
+        }
+        
+        // 隐藏用户信息显示
+        const userDisplay = document.getElementById('userDisplay');
+        if (userDisplay) {
+            userDisplay.classList.add('hidden');
+        }
+        
+        // 确保主内容区域隐藏
+        const mainContent = document.getElementById('mainContent');
+        if (mainContent) {
+            mainContent.classList.add('hidden');
+        }
     },
     
     /**
@@ -521,6 +564,9 @@ const AuthModule = {
      * 监控身份验证状态
      */
     monitorAuthState: function() {
+        // 先确保登录界面显示，再开始检查用户状态
+        this.ensureAuthFormsVisible();
+        
         // 使用Firebase身份验证监听用户状态变化
         FirebaseModule.auth.onAuthStateChanged((user) => {
             if (user) {

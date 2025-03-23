@@ -31,6 +31,17 @@
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(5px);
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 /* 身份验证表单容器 */
@@ -387,4 +398,21 @@
     color: #9e9e9e;
     font-size: 14px;
     margin-bottom: 10px;
+}
+
+/* 改进过渡效果 */
+.auth-container, .main {
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 当登录容器或主内容被隐藏时，应用渐变效果 */
+.auth-container.hidden, .main.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 当显示时，确保元素可见并可交互 */
+.auth-container:not(.hidden), .main:not(.hidden) {
+    opacity: 1;
+    pointer-events: auto;
 } 
