@@ -12,7 +12,7 @@
  * - Firebase初始化
  * - Firebase服务导出
  * 
- * 最后更新：2024-06-08 - 添加电话验证和匿名登录支持
+ * 最后更新：2024-06-08 - 添加错误处理和登录状态初始检查
  */
 
 // Firebase配置对象
@@ -28,15 +28,34 @@ const firebaseConfig = {
 };
 
 // 初始化Firebase应用实例
-const app = firebase.initializeApp(firebaseConfig);
+let app, auth, analytics, googleProvider, phoneProvider;
 
-// 初始化Firebase服务
-const auth = firebase.auth(); // 身份验证服务
-const analytics = firebase.analytics(); // 分析服务
-
-// 创建身份验证提供商实例
-const googleProvider = new firebase.auth.GoogleAuthProvider(); // Google登录提供商
-const phoneProvider = new firebase.auth.PhoneAuthProvider(); // 电话验证提供商
+try {
+  // 尝试初始化Firebase应用
+  app = firebase.initializeApp(firebaseConfig);
+  
+  // 初始化Firebase服务
+  auth = firebase.auth(); // 身份验证服务
+  analytics = firebase.analytics(); // 分析服务
+  
+  // 创建身份验证提供商实例
+  googleProvider = new firebase.auth.GoogleAuthProvider(); // Google登录提供商
+  phoneProvider = new firebase.auth.PhoneAuthProvider(); // 电话验证提供商
+  
+  console.log('Firebase初始化成功');
+} catch (error) {
+  console.error('Firebase初始化失败:', error);
+  
+  // 显示错误消息
+  const authContainer = document.getElementById('authContainer');
+  if (authContainer) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'auth-message message--error';
+    errorDiv.textContent = '连接服务器失败，请刷新页面重试';
+    errorDiv.style.margin = '20px';
+    authContainer.prepend(errorDiv);
+  }
+}
 
 // 导出Firebase模块
 const FirebaseModule = {
