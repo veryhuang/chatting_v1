@@ -1,0 +1,146 @@
+/* 
+ * reset.css - 样式重置文件
+ * 
+ * 功能和作用：
+ * 1. 重置浏览器默认样式，确保跨浏览器的一致性
+ * 2. 消除不同浏览器之间的样式差异
+ * 3. 建立一个干净、统一的样式基础
+ * 4. 防止浏览器自带样式影响应用的视觉设计
+ * 5. 简化样式开发，避免处理各种默认样式问题
+ * 
+ * 重置内容包括：
+ * - 盒模型（边距、填充、边框）
+ * - 字体和文本样式
+ * - 列表样式
+ * - 表单元素样式
+ * - 链接样式
+ * - 多媒体元素（图片、视频等）
+ * 
+ * 最后更新：2024-03-19
+ */
+
+/* 重置所有元素的盒模型 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 修正HTML5元素在旧浏览器中的显示问题 */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, main, menu, nav, section {
+    display: block;
+}
+
+/* 设置基础字体和行高 */
+html {
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%; /* 防止在iPhone中横屏时自动调整字体大小 */
+    -ms-text-size-adjust: 100%;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+/* 移除列表样式 */
+ol, ul {
+    list-style: none;
+}
+
+/* 标题元素字体样式重置 */
+h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+}
+
+/* 链接样式重置 */
+a {
+    color: inherit;
+    text-decoration: none;
+    background-color: transparent; /* 移除IE 10中的灰色背景 */
+}
+
+/* 强调元素样式重置 */
+strong, b {
+    font-weight: bolder;
+}
+
+/* 图片和媒体元素的改进 */
+img, video, canvas, audio, iframe, embed, object {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* 表单元素的样式重置 */
+button, input, optgroup, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0;
+}
+
+button, input {
+    overflow: visible;
+}
+
+button, select {
+    text-transform: none;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+    -webkit-appearance: button;
+    appearance: button;
+}
+
+/* 移除按钮和输入框内部边框 */
+button::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner {
+    border-style: none;
+    padding: 0;
+}
+
+/* 修复Firefox中的焦点样式 */
+button:-moz-focusring,
+[type="button"]:-moz-focusring,
+[type="reset"]:-moz-focusring,
+[type="submit"]:-moz-focusring {
+    outline: 1px dotted ButtonText;
+}
+
+/* 移除textarea的默认垂直滚动条 */
+textarea {
+    overflow: auto;
+    resize: vertical;
+}
+
+/* 移除表单元素的默认样式 */
+fieldset {
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+/* 修复Edge, IE中的display问题 */
+progress {
+    vertical-align: baseline;
+}
+
+/* 避免一些浏览器中默认的outline */
+[tabindex="-1"]:focus {
+    outline: 0 !important;
+}
+
+/* 隐藏元素 */
+.hidden {
+    display: none !important;
+} 

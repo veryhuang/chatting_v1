@@ -1,0 +1,425 @@
+<!--
+index.html - 主HTML文件
+这是微信聊天记录生成器的主要HTML结构文件
+
+功能和作用：
+1. 定义整个应用的HTML结构，包括编辑区和预览区
+2. 提供用户界面元素，如表单控件、按钮和模态框
+3. 链接所有CSS样式和JavaScript脚本文件
+4. 建立响应式布局，适配不同屏幕尺寸
+5. 模拟微信聊天界面的外观和交互体验
+
+组件包括：
+- 顶部导航栏：用于保存/加载模板和导出图片
+- 左侧编辑区：用于设置用户信息、背景和编辑聊天内容
+- 右侧预览区：实时展示生成的微信聊天界面效果
+- 各种模态框：用于保存/加载模板和导出设置
+
+最后更新：2024-03-19
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟微信聊天记录生成器</title>
+    <!-- 引入样式表 -->
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- 新增身份验证样式 -->
+    <link rel="stylesheet" href="css/auth.css">
+    <!-- 网站图标 -->
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon">
+    <!-- 网站描述 -->
+    <meta name="description" content="在线生成虚拟微信聊天记录，自定义聊天内容、头像和昵称，导出为图片">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics-compat.js"></script>
+</head>
+<body>
+    <!-- 身份验证容器 -->
+    <div id="authContainer" class="auth-container">
+        <!-- 登录表单容器 -->
+        <div id="loginContainer" class="auth-form-container">
+            <h2 class="auth-title">登录到聊天记录生成器</h2>
+            
+            <!-- 消息提示 -->
+            <div id="authMessage" class="auth-message hidden"></div>
+            
+            <!-- 登录表单 -->
+            <form id="loginForm" class="auth-form">
+                <!-- 邮箱 -->
+                <div class="auth-form-group">
+                    <label for="loginEmail" class="auth-label">邮箱</label>
+                    <input type="email" id="loginEmail" class="auth-input" placeholder="请输入您的邮箱" required>
+                </div>
+                
+                <!-- 密码 -->
+                <div class="auth-form-group">
+                    <label for="loginPassword" class="auth-label">密码</label>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="请输入您的密码" required>
+                </div>
+                
+                <!-- 登录按钮 -->
+                <button type="submit" class="auth-button">登录</button>
+                
+                <!-- 辅助链接 -->
+                <div class="auth-links">
+                    <a id="forgotPasswordLink" class="auth-link">忘记密码？</a>
+                    <a id="showRegisterBtn" class="auth-link">没有账号？注册</a>
+                </div>
+            </form>
+            
+            <!-- 分隔线 -->
+            <div class="auth-divider">
+                <span class="auth-divider-text">或使用</span>
+            </div>
+            
+            <!-- 第三方登录 -->
+            <div class="auth-alt-methods">
+                <button id="googleLoginBtn" class="auth-alt-button google-login-button">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    使用Google账号登录
+                </button>
+                
+                <!-- 电话登录按钮 -->
+                <button id="showPhoneLoginBtn" class="auth-alt-button phone-login-button">
+                    <svg class="auth-icon" viewBox="0 0 24 24">
+                        <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
+                    </svg>
+                    使用手机号码登录
+                </button>
+                
+                <!-- 匿名登录按钮 -->
+                <button id="anonymousLoginBtn" class="auth-alt-button anonymous-login-button">
+                    <svg class="auth-icon" viewBox="0 0 24 24">
+                        <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                    </svg>
+                    匿名访问
+                </button>
+            </div>
+        </div>
+        
+        <!-- 注册表单容器 -->
+        <div id="registerContainer" class="auth-form-container hidden">
+            <h2 class="auth-title">注册新账号</h2>
+            
+            <!-- 注册表单 -->
+            <form id="registerForm" class="auth-form">
+                <!-- 邮箱 -->
+                <div class="auth-form-group">
+                    <label for="registerEmail" class="auth-label">邮箱</label>
+                    <input type="email" id="registerEmail" class="auth-input" placeholder="请输入您的邮箱" required>
+                </div>
+                
+                <!-- 密码 -->
+                <div class="auth-form-group">
+                    <label for="registerPassword" class="auth-label">密码</label>
+                    <input type="password" id="registerPassword" class="auth-input" placeholder="请设置密码（至少6位）" required minlength="6">
+                </div>
+                
+                <!-- 确认密码 -->
+                <div class="auth-form-group">
+                    <label for="confirmPassword" class="auth-label">确认密码</label>
+                    <input type="password" id="confirmPassword" class="auth-input" placeholder="请再次输入密码" required minlength="6">
+                </div>
+                
+                <!-- 注册按钮 -->
+                <button type="submit" class="auth-button">注册</button>
+                
+                <!-- 已有账号 -->
+                <div class="auth-links">
+                    <a id="showLoginBtn" class="auth-link">已有账号？去登录</a>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 电话登录表单容器 -->
+        <div id="phoneLoginContainer" class="auth-form-container hidden">
+            <h2 class="auth-title">手机号码登录</h2>
+            
+            <!-- 第一步：输入手机号码 -->
+            <div id="phoneStep1" class="phone-step">
+                <div class="auth-form-group">
+                    <label for="phoneNumber" class="auth-label">手机号码</label>
+                    <div class="phone-input-container">
+                        <select id="phoneCountryCode" class="country-code-select">
+                            <option value="+86">+86</option>
+                            <option value="+1">+1</option>
+                            <option value="+44">+44</option>
+                            <option value="+81">+81</option>
+                            <option value="+82">+82</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" class="auth-input" placeholder="请输入手机号码" required>
+                    </div>
+                </div>
+                
+                <!-- reCAPTCHA容器 -->
+                <div id="recaptchaContainer" class="recaptcha-container"></div>
+                
+                <button id="sendCodeBtn" class="auth-button">发送验证码</button>
+            </div>
+            
+            <!-- 第二步：输入验证码 -->
+            <div id="phoneStep2" class="phone-step hidden">
+                <div class="auth-form-group">
+                    <label for="verificationCode" class="auth-label">验证码</label>
+                    <input type="text" id="verificationCode" class="auth-input auth-code-input" placeholder="请输入6位验证码" maxlength="6" required>
+                </div>
+                
+                <div class="auth-timer">
+                    <span id="codeTimer">60</span>秒后可重新发送
+                </div>
+                
+                <button id="verifyCodeBtn" class="auth-button">验证并登录</button>
+            </div>
+            
+            <!-- 返回登录选项 -->
+            <div class="auth-links">
+                <a id="backToLoginBtn" class="auth-link">返回其他登录方式</a>
+            </div>
+        </div>
+        
+        <!-- 用户信息显示 -->
+        <div id="userDisplay" class="user-display hidden">
+            <div class="user-avatar">
+                <img id="userAvatar" src="assets/images/default-avatar-me.png" alt="用户头像">
+            </div>
+            <div class="user-info">
+                <div id="userEmail" class="user-email">用户邮箱</div>
+                <div id="logoutBtn" class="user-logout">退出登录</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">虚拟微信聊天记录生成器</h1>
+            <nav class="nav">
+                <ul class="nav__menu">
+                    <li class="nav__item"><button id="saveBtn" class="btn">保存模板</button></li>
+                    <li class="nav__item"><button id="loadBtn" class="btn">加载模板</button></li>
+                    <li class="nav__item"><button id="exportBtn" class="btn btn--primary">导出图片</button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main id="mainContent" class="main hidden">
+        <div class="container">
+            <!-- 左侧编辑区域 -->
+            <section class="editor">
+                <h2 class="editor__title">编辑区</h2>
+                
+                <!-- 用户信息设置 -->
+                <div class="panel">
+                    <h3 class="panel__title">用户信息设置</h3>
+                    <div class="panel__content">
+                        <!-- 对方的昵称 -->
+                        <div class="form-group">
+                            <label for="friendName" class="form-label">对方昵称：</label>
+                            <input type="text" id="friendName" class="form-input" value="好友">
+                        </div>
+                        
+                        <!-- 头像设置 -->
+                        <div class="avatar-settings">
+                            <div class="avatar-group">
+                                <label class="form-label">我的头像：</label>
+                                <div class="avatar-preview" id="myAvatar"></div>
+                                <input type="file" id="myAvatarUpload" class="avatar-upload" accept="image/*">
+                                <label for="myAvatarUpload" class="btn btn--small">上传头像</label>
+                            </div>
+                            
+                            <div class="avatar-group">
+                                <label class="form-label">对方头像：</label>
+                                <div class="avatar-preview" id="friendAvatar"></div>
+                                <input type="file" id="friendAvatarUpload" class="avatar-upload" accept="image/*">
+                                <label for="friendAvatarUpload" class="btn btn--small">上传头像</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 聊天样式设置 -->
+                <div class="panel">
+                    <h3 class="panel__title">聊天样式设置</h3>
+                    <div class="panel__content">
+                        <!-- 背景设置 -->
+                        <div class="form-group">
+                            <label class="form-label">聊天背景：</label>
+                            <select id="backgroundSelect" class="form-select">
+                                <option value="default">默认背景</option>
+                                <option value="white">纯白</option>
+                                <option value="gray">浅灰</option>
+                                <option value="black">纯黑</option>
+                                <option value="custom">自定义图片</option>
+                            </select>
+                            <div id="customBackgroundContainer" class="custom-background hidden">
+                                <input type="file" id="customBackground" accept="image/*">
+                                <label for="customBackground" class="btn btn--small">选择图片</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 聊天内容编辑 -->
+                <div class="panel">
+                    <h3 class="panel__title">聊天内容编辑</h3>
+                    <div class="panel__content">
+                        <!-- 添加新消息 -->
+                        <div class="form-group">
+                            <label for="messageContent" class="form-label">消息内容：</label>
+                            <textarea id="messageContent" class="form-textarea" rows="3" placeholder="输入消息内容..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">消息发送方：</label>
+                            <div class="radio-group">
+                                <input type="radio" id="senderMe" name="sender" value="me" checked>
+                                <label for="senderMe" class="radio-label">我</label>
+                                
+                                <input type="radio" id="senderFriend" name="sender" value="friend">
+                                <label for="senderFriend" class="radio-label">对方</label>
+                                
+                                <input type="radio" id="senderSystem" name="sender" value="system">
+                                <label for="senderSystem" class="radio-label">系统提示</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="messageTime" class="form-label">消息时间：</label>
+                            <input type="time" id="messageTime" class="form-input">
+                        </div>
+                        
+                        <button id="addMessageBtn" class="btn btn--primary btn--block">添加消息</button>
+                        
+                        <!-- 消息列表 -->
+                        <div class="message-list">
+                            <h4 class="message-list__title">已添加的消息：</h4>
+                            <ul id="editorMessageList" class="message-items">
+                                <!-- 动态生成的消息项 -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 右侧预览区域 -->
+            <section class="preview">
+                <h2 class="preview__title">预览区</h2>
+                
+                <div class="preview-container">
+                    <!-- 手机状态栏 -->
+                    <div class="wx-phone-status">
+                        <div class="wx-phone-time">09:05</div>
+                        <div class="wx-phone-icons">
+                            <span class="wx-phone-signal"></span>
+                            <span class="wx-phone-wifi"></span>
+                            <span class="wx-phone-battery">100</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 微信顶部导航栏 -->
+                    <div class="wx-status-bar">
+                        <div class="wx-status-bar__back">
+                            <span class="wx-icon wx-icon--back"></span>
+                            <span class="wx-back-count"></span>
+                        </div>
+                        <div class="wx-status-bar__title" id="previewFriendName">好友</div>
+                        <div class="wx-status-bar__actions">
+                            <span class="wx-icon wx-icon--more"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- 聊天记录区域 -->
+                    <div id="chatContainer" class="wx-chat-container">
+                        <div id="chatContent" class="wx-chat-content">
+                            <!-- 动态生成的聊天消息 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 底部输入框 -->
+                    <div class="wx-input-bar">
+                        <div class="wx-input-bar__voice"></div>
+                        <div class="wx-input-bar__text">按住 说话</div>
+                        <div class="wx-input-bar__emoji"></div>
+                        <div class="wx-input-bar__plus"></div>
+                    </div>
+                    
+                    <!-- 底部导航条 -->
+                    <div class="wx-bottom-indicator"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 模板选择弹窗 -->
+    <div id="templateModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">选择模板</h3>
+            <div class="template-list" id="templateList">
+                <!-- 动态生成的模板项 -->
+            </div>
+            <div class="modal__actions">
+                <button id="closeTemplateModal" class="btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导出选项弹窗 -->
+    <div id="exportModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">导出选项</h3>
+            <div class="form-group">
+                <label class="form-label">图片格式：</label>
+                <select id="exportFormat" class="form-select">
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPG</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">导出范围：</label>
+                <select id="exportRange" class="form-select">
+                    <option value="all">全部聊天记录</option>
+                    <option value="selected">选中部分</option>
+                </select>
+            </div>
+            <div class="modal__actions">
+                <button id="startExportBtn" class="btn btn--primary">开始导出</button>
+                <button id="closeExportModal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 保存模板弹窗 -->
+    <div id="saveTemplateModal" class="modal hidden">
+        <div class="modal__content">
+            <h3 class="modal__title">保存模板</h3>
+            <div class="form-group">
+                <label for="templateName" class="form-label">模板名称：</label>
+                <input type="text" id="templateName" class="form-input" placeholder="输入模板名称...">
+            </div>
+            <div class="modal__actions">
+                <button id="confirmSaveTemplate" class="btn btn--primary">保存</button>
+                <button id="closeSaveTemplateModal" class="btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入html2canvas库 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <!-- 引入脚本 -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/export.js"></script>
+</body>
+</html> 
